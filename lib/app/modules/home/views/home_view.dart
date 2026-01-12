@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import '../../../widgets/post_card.dart';
 import '../../../widgets/loading_widget.dart';
 import '../../../core/controllers/navigation_controller.dart';
-import '../../../core/services/storage_service.dart';
 import '../controllers/home_controller.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -70,14 +69,8 @@ class HomeView extends GetView<HomeController> {
                           child: PostCard(
                             post: post,
                             onTap: () => controller.navigateToPostDetail(post),
-                            onFavoriteTap: () {
-                              if (StorageService.isFavorite(post.id)) {
-                                StorageService.removeFavorite(post.id);
-                              } else {
-                                StorageService.addFavorite(post.id);
-                              }
-                              controller.update();
-                            },
+                            onFavoriteTap: () =>
+                                controller.toggleBookmark(post.id),
                           ),
                         );
                       },
@@ -137,14 +130,7 @@ class HomeView extends GetView<HomeController> {
                       return PostCard(
                         post: post,
                         onTap: () => controller.navigateToPostDetail(post),
-                        onFavoriteTap: () {
-                          if (StorageService.isFavorite(post.id)) {
-                            StorageService.removeFavorite(post.id);
-                          } else {
-                            StorageService.addFavorite(post.id);
-                          }
-                          controller.update();
-                        },
+                        onFavoriteTap: () => controller.toggleBookmark(post.id),
                       );
                     },
                   ),
@@ -154,6 +140,7 @@ class HomeView extends GetView<HomeController> {
           );
         }),
       ),
+
       bottomNavigationBar: Obx(
         () => BottomNavigationBar(
           currentIndex: navigationController.currentIndex.value,

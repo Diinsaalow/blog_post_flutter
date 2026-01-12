@@ -131,7 +131,8 @@ class PostDetailView extends GetView<PostDetailController> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              post.category!,
+                              post.category!.substring(0, 1).toUpperCase() +
+                                  post.category!.substring(1).toLowerCase(),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Theme.of(context).primaryColor,

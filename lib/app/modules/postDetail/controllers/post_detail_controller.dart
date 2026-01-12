@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/repositories/post_repository.dart';
 import '../../../data/repositories/comment_repository.dart';
+import '../../../data/repositories/user_repository.dart';
 import '../../../data/models/post_model.dart';
 import '../../../data/models/comment_model.dart';
 import '../../../core/services/storage_service.dart';
@@ -10,6 +11,7 @@ import '../../../core/services/storage_service.dart';
 class PostDetailController extends GetxController {
   final PostRepository _postRepository = Get.find<PostRepository>();
   final CommentRepository _commentRepository = Get.find<CommentRepository>();
+  final UserRepository _userRepository = Get.find<UserRepository>();
 
   final Rx<PostModel?> post = Rx<PostModel?>(null);
   final RxList<CommentModel> comments = <CommentModel>[].obs;
@@ -81,23 +83,34 @@ class PostDetailController extends GetxController {
   Future<void> toggleFavorite() async {
     if (post.value == null) return;
 
+    if (!StorageService.isLoggedIn) {
+      Get.snackbar(
+        'Login Required',
+        'Please login to bookmark posts',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange.withOpacity(0.1),
+        colorText: Colors.orange,
+      );
+      return;
+    }
+
     try {
       if (isFavorite.value) {
-        await StorageService.removeFavorite(post.value!.id);
+        await _userRepository.removeBookmark(post.value!.id);
         isFavorite.value = false;
         Get.snackbar(
           'Removed',
-          'Removed from favorites',
+          'Removed from bookmarks',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.orange.withOpacity(0.1),
           colorText: Colors.orange,
         );
       } else {
-        await StorageService.addFavorite(post.value!.id);
+        await _userRepository.addBookmark(post.value!.id);
         isFavorite.value = true;
         Get.snackbar(
           'Added',
-          'Added to favorites',
+          'Added to bookmarks',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
           colorText: Get.theme.primaryColor,
@@ -106,7 +119,7 @@ class PostDetailController extends GetxController {
     } catch (e) {
       Get.snackbar(
         'Error',
-        e.toString(),
+        'Failed to update bookmark: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.withOpacity(0.1),
         colorText: Colors.red,

@@ -2,11 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../../data/repositories/user_repository.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../routes/app_pages.dart';
 
 class AuthController extends GetxController {
   final AuthRepository _authRepository = Get.find<AuthRepository>();
+  final UserRepository _userRepository = Get.find<UserRepository>();
 
   final RxBool isLoading = false.obs;
   final RxBool isLoggedIn = false.obs;
@@ -33,6 +35,15 @@ class AuthController extends GetxController {
         username: username,
         password: password,
       );
+
+      // Sync user profile after registration
+      try {
+        await _userRepository.getProfile();
+      } catch (syncError) {
+        // Don't fail registration if profile sync fails
+        print('Failed to sync profile: $syncError');
+      }
+
       isLoggedIn.value = true;
       Get.offAllNamed(Routes.HOME);
       Get.snackbar(
@@ -59,6 +70,15 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
       await _authRepository.login(email: email, password: password);
+
+      // Sync bookmarks from backend after login
+      try {
+        await _userRepository.getProfile();
+      } catch (syncError) {
+        // Don't fail login if bookmark sync fails
+        print('Failed to sync bookmarks: $syncError');
+      }
+
       isLoggedIn.value = true;
       Get.offAllNamed(Routes.HOME);
       Get.snackbar(

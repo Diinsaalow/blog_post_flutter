@@ -174,36 +174,6 @@ class ProfileView extends GetView<ProfileController> {
 
               const SizedBox(height: 24),
 
-              // Stats Section
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatCard(
-                        context,
-                        icon: Icons.favorite,
-                        label: 'Favorites',
-                        value: StorageService.getFavorites().length.toString(),
-                        color: Colors.red,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildStatCard(
-                        context,
-                        icon: Icons.bookmark,
-                        label: 'Bookmarks',
-                        value: user.bookmarks.length.toString(),
-                        color: Colors.blue,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
               // Account Information
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -236,7 +206,9 @@ class ProfileView extends GetView<ProfileController> {
                         context,
                         icon: Icons.check_circle_outline,
                         label: 'Status',
-                        value: user.status!,
+                        value:
+                            user.status!.substring(0, 1).toUpperCase() +
+                            user.status!.substring(1).toLowerCase(),
                       ),
                     if (user.createdAt != null)
                       _buildInfoTile(
@@ -252,83 +224,6 @@ class ProfileView extends GetView<ProfileController> {
               ),
 
               const SizedBox(height: 24),
-
-              // Settings Section
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Settings',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    _buildSettingsTile(
-                      context,
-                      icon: Icons.edit_outlined,
-                      title: 'Edit Profile',
-                      onTap: () {
-                        Get.snackbar(
-                          'Coming Soon',
-                          'Edit profile feature will be available soon',
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
-                      },
-                    ),
-                    _buildSettingsTile(
-                      context,
-                      icon: Icons.notifications_outlined,
-                      title: 'Notifications',
-                      onTap: () {
-                        Get.snackbar(
-                          'Coming Soon',
-                          'Notification settings will be available soon',
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
-                      },
-                    ),
-                    _buildSettingsTile(
-                      context,
-                      icon: Icons.security_outlined,
-                      title: 'Privacy & Security',
-                      onTap: () {
-                        Get.snackbar(
-                          'Coming Soon',
-                          'Privacy settings will be available soon',
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
-                      },
-                    ),
-                    _buildSettingsTile(
-                      context,
-                      icon: Icons.help_outline,
-                      title: 'Help & Support',
-                      onTap: () {
-                        Get.snackbar(
-                          'Coming Soon',
-                          'Help & support will be available soon',
-                          snackPosition: SnackPosition.BOTTOM,
-                        );
-                      },
-                    ),
-                    _buildSettingsTile(
-                      context,
-                      icon: Icons.info_outline,
-                      title: 'About',
-                      onTap: () {
-                        _showAboutDialog(context);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 32),
 
               // Logout Button
               Padding(
@@ -521,7 +416,7 @@ class ProfileView extends GetView<ProfileController> {
       children: [
         const SizedBox(height: 16),
         const Text(
-          'A modern blog application built with Flutter and GetX.',
+          'Full stack web and mobile application built with Flutter, Node.js, and MongoDB, .',
           textAlign: TextAlign.center,
         ),
       ],

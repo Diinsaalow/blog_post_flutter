@@ -5,6 +5,7 @@ import 'app/core/services/api_service.dart';
 import 'app/data/repositories/auth_repository.dart';
 import 'app/data/repositories/post_repository.dart';
 import 'app/data/repositories/comment_repository.dart';
+import 'app/data/repositories/user_repository.dart';
 import 'app/core/controllers/navigation_controller.dart';
 import 'app/routes/app_pages.dart';
 
@@ -19,6 +20,7 @@ void main() async {
   Get.put(AuthRepository(), permanent: true);
   Get.put(PostRepository(), permanent: true);
   Get.put(CommentRepository(), permanent: true);
+  Get.put(UserRepository(), permanent: true);
   Get.put(NavigationController(), permanent: true);
 
   runApp(

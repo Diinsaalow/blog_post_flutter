@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import '../../../widgets/post_card.dart';
 import '../../../widgets/loading_widget.dart';
 import '../../../core/controllers/navigation_controller.dart';
-import '../../../core/services/storage_service.dart';
 import '../controllers/all_posts_controller.dart';
 
 class AllPostsView extends GetView<AllPostsController> {
@@ -45,6 +44,7 @@ class AllPostsView extends GetView<AllPostsController> {
             padding: const EdgeInsets.all(16),
             color: Theme.of(context).scaffoldBackgroundColor,
             child: TextField(
+              controller: controller.searchController,
               decoration: InputDecoration(
                 hintText: 'Search posts...',
                 prefixIcon: const Icon(Icons.search),
@@ -52,7 +52,10 @@ class AllPostsView extends GetView<AllPostsController> {
                   () => controller.searchQuery.value.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear),
-                          onPressed: () => controller.searchPosts(''),
+                          onPressed: () {
+                            controller.searchController.clear();
+                            controller.searchPosts('');
+                          },
                         )
                       : const SizedBox.shrink(),
                 ),
@@ -79,47 +82,48 @@ class AllPostsView extends GetView<AllPostsController> {
                 ),
               ),
               onChanged: (value) {
-                // Debounce search
-                Future.delayed(const Duration(milliseconds: 500), () {
-                  if (controller.searchQuery.value != value) {
-                    controller.searchPosts(value);
-                  }
-                });
+                controller.searchPosts(value);
               },
             ),
           ),
 
-          // Category Filter Chips (Optional)
+          // Category Filter Pills
           Obx(() {
             final categories = _getUniqueCategories(controller.posts);
             if (categories.isEmpty) return const SizedBox.shrink();
 
             return Container(
-              height: 50,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ListView.builder(
+              height: 56,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: ListView(
                 scrollDirection: Axis.horizontal,
-                itemCount: categories.length,
-                itemBuilder: (context, index) {
-                  final category = categories[index];
-                  final isSelected =
-                      controller.selectedCategory.value == category;
-
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(category),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        controller.filterByCategory(selected ? category : '');
-                      },
-                      selectedColor: Theme.of(
-                        context,
-                      ).primaryColor.withOpacity(0.2),
-                      checkmarkColor: Theme.of(context).primaryColor,
-                    ),
-                  );
-                },
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: [
+                  // "All" button
+                  _buildCategoryPill(
+                    context: context,
+                    label: 'All',
+                    isSelected: controller.selectedCategory.value.isEmpty,
+                    onTap: () => controller.filterByCategory(''),
+                  ),
+                  const SizedBox(width: 8),
+                  // Category buttons
+                  ...categories.map((category) {
+                    final isSelected =
+                        controller.selectedCategory.value == category;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _buildCategoryPill(
+                        context: context,
+                        label:
+                            category.substring(0, 1).toUpperCase() +
+                            category.substring(1).toLowerCase(),
+                        isSelected: isSelected,
+                        onTap: () => controller.filterByCategory(category),
+                      ),
+                    );
+                  }),
+                ],
               ),
             );
           }),
@@ -173,14 +177,7 @@ class AllPostsView extends GetView<AllPostsController> {
                     return PostCard(
                       post: post,
                       onTap: () => controller.navigateToPostDetail(post),
-                      onFavoriteTap: () {
-                        if (StorageService.isFavorite(post.id)) {
-                          StorageService.removeFavorite(post.id);
-                        } else {
-                          StorageService.addFavorite(post.id);
-                        }
-                        controller.update();
-                      },
+                      onFavoriteTap: () => controller.toggleBookmark(post.id),
                     );
                   },
                 );
@@ -218,6 +215,39 @@ class AllPostsView extends GetView<AllPostsController> {
               label: 'Profile',
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // Helper to build category pill button
+  Widget _buildCategoryPill({
+    required BuildContext context,
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Theme.of(context).primaryColor : Colors.grey[100],
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : Colors.grey[300]!,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.grey[700],
+            fontSize: 14,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          ),
         ),
       ),
     );

@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../data/models/post_model.dart';
 import '../core/services/storage_service.dart';
 
-class PostCard extends StatelessWidget {
+class PostCard extends StatefulWidget {
   final PostModel post;
   final VoidCallback? onTap;
   final VoidCallback? onFavoriteTap;
@@ -20,18 +20,51 @@ class PostCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final isFavorite = StorageService.isFavorite(post.id);
+  State<PostCard> createState() => _PostCardState();
+}
 
+class _PostCardState extends State<PostCard> {
+  late bool isFavorite;
+
+  @override
+  void initState() {
+    super.initState();
+    isFavorite = StorageService.isFavorite(widget.post.id);
+  }
+
+  @override
+  void didUpdateWidget(PostCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync state with storage when widget updates
+    if (oldWidget.post.id != widget.post.id) {
+      isFavorite = StorageService.isFavorite(widget.post.id);
+    }
+  }
+
+  void _handleFavoriteTap() {
+    if (widget.onFavoriteTap != null) {
+      // Optimistically toggle the UI immediately for instant feedback
+      setState(() {
+        isFavorite = !isFavorite;
+      });
+
+      // Call the parent's callback (async backend sync)
+      widget.onFavoriteTap!();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       elevation: 0,
+      color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(color: Colors.grey[300]!, width: 1),
       ),
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         borderRadius: BorderRadius.circular(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,9 +76,9 @@ class PostCard extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  post.coverImageUrl != null
+                  widget.post.coverImageUrl != null
                       ? CachedNetworkImage(
-                          imageUrl: post.coverImageUrl!,
+                          imageUrl: widget.post.coverImageUrl!,
                           height: 200,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -68,7 +101,7 @@ class PostCard extends StatelessWidget {
                           child: const Icon(Icons.image, size: 50),
                         ),
                   // Featured Badge
-                  if (post.isFeatured)
+                  if (widget.post.isFeatured)
                     Positioned(
                       top: 12,
                       left: 12,
@@ -108,7 +141,7 @@ class PostCard extends StatelessWidget {
                   // Category & Reading Time
                   Row(
                     children: [
-                      if (post.category != null)
+                      if (widget.post.category != null)
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -121,8 +154,12 @@ class PostCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            post.category!.substring(0, 1).toUpperCase() +
-                                post.category!.substring(1).toLowerCase(),
+                            widget.post.category!
+                                    .substring(0, 1)
+                                    .toUpperCase() +
+                                widget.post.category!
+                                    .substring(1)
+                                    .toLowerCase(),
                             style: TextStyle(
                               fontSize: 12,
                               color: Theme.of(context).primaryColor,
@@ -132,18 +169,19 @@ class PostCard extends StatelessWidget {
                         ),
                       const SizedBox(width: 8),
                       Text(
-                        '${post.readingTimeMin} min read',
+                        '${widget.post.readingTimeMin} min read',
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                       const Spacer(),
-                      if (showFavoriteButton && onFavoriteTap != null)
+                      if (widget.showFavoriteButton &&
+                          widget.onFavoriteTap != null)
                         IconButton(
                           icon: Icon(
                             isFavorite ? Icons.favorite : Icons.favorite_border,
                             color: isFavorite ? Colors.red : Colors.grey[600],
                             size: 20,
                           ),
-                          onPressed: onFavoriteTap,
+                          onPressed: _handleFavoriteTap,
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
                         ),
@@ -152,7 +190,7 @@ class PostCard extends StatelessWidget {
                   const SizedBox(height: 12),
                   // Title
                   Text(
-                    post.title,
+                    widget.post.title,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -163,9 +201,9 @@ class PostCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   // Excerpt
-                  if (post.excerpt != null)
+                  if (widget.post.excerpt != null)
                     Text(
-                      post.excerpt!,
+                      widget.post.excerpt!,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
@@ -180,13 +218,13 @@ class PostCard extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 14,
-                        backgroundImage: post.author?.avatarUrl != null
+                        backgroundImage: widget.post.author?.avatarUrl != null
                             ? CachedNetworkImageProvider(
-                                post.author!.avatarUrl!,
+                                widget.post.author!.avatarUrl!,
                               )
                             : null,
                         backgroundColor: Colors.grey[300],
-                        child: post.author?.avatarUrl == null
+                        child: widget.post.author?.avatarUrl == null
                             ? Icon(
                                 Icons.person,
                                 size: 16,
@@ -200,14 +238,16 @@ class PostCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              post.author?.username ?? 'Unknown',
+                              widget.post.author?.username ?? 'Unknown',
                               style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             Text(
-                              DateFormat('MMM dd, yyyy').format(post.createdAt),
+                              DateFormat(
+                                'MMM dd, yyyy',
+                              ).format(widget.post.createdAt),
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey[600],
@@ -223,7 +263,7 @@ class PostCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '${post.views}',
+                        '${widget.post.views}',
                         style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
