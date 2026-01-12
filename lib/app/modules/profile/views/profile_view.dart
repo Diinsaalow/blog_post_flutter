@@ -5,7 +5,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../widgets/custom_button.dart';
 import '../../../core/controllers/navigation_controller.dart';
-import '../../../core/services/storage_service.dart';
 import '../controllers/profile_controller.dart';
 
 class ProfileView extends GetView<ProfileController> {
@@ -24,6 +23,13 @@ class ProfileView extends GetView<ProfileController> {
         ),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () => _showEditProfileDialog(context),
+            tooltip: 'Edit Profile',
+          ),
+        ],
       ),
       body: Obx(() {
         final user = controller.user.value;
@@ -219,6 +225,15 @@ class ProfileView extends GetView<ProfileController> {
                           'MMMM dd, yyyy',
                         ).format(user.createdAt!),
                       ),
+                    if (user.updatedAt != null)
+                      _buildInfoTile(
+                        context,
+                        icon: Icons.update_outlined,
+                        label: 'Last Updated',
+                        value: DateFormat(
+                          'MMMM dd, yyyy',
+                        ).format(user.updatedAt!),
+                      ),
                   ],
                 ),
               ),
@@ -357,35 +372,6 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildSettingsTile(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(icon, size: 20),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: onTap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        tileColor: Colors.grey[50],
-      ),
-    );
-  }
-
   void _showLogoutDialog(BuildContext context) {
     Get.dialog(
       AlertDialog(
@@ -407,19 +393,143 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  void _showAboutDialog(BuildContext context) {
-    showAboutDialog(
-      context: context,
-      applicationName: 'Blog Post',
-      applicationVersion: '1.0.0',
-      applicationIcon: const Icon(Icons.article, size: 48),
-      children: [
-        const SizedBox(height: 16),
-        const Text(
-          'Full stack web and mobile application built with Flutter, Node.js, and MongoDB, .',
-          textAlign: TextAlign.center,
+  void _showEditProfileDialog(BuildContext context) {
+    controller.showEditProfileDialog();
+
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 500),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.edit,
+                    color: Theme.of(context).primaryColor,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Edit Profile',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Get.back(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              TextField(
+                controller: controller.usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  prefixIcon: const Icon(Icons.person_outline),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller.avatarUrlController,
+                decoration: InputDecoration(
+                  labelText: 'Avatar URL',
+                  prefixIcon: const Icon(Icons.image_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                  hintText: 'https://example.com/avatar.jpg',
+                ),
+              ),
+              const SizedBox(height: 24),
+              Obx(
+                () => Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: controller.isUpdating.value
+                            ? null
+                            : () => Get.back(),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: controller.isUpdating.value
+                            ? null
+                            : () {
+                                final username = controller
+                                    .usernameController
+                                    .text
+                                    .trim();
+                                final avatarUrl = controller
+                                    .avatarUrlController
+                                    .text
+                                    .trim();
+
+                                if (username.isEmpty) {
+                                  Get.snackbar(
+                                    'Error',
+                                    'Username cannot be empty',
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    backgroundColor: Colors.red.withOpacity(
+                                      0.1,
+                                    ),
+                                    colorText: Colors.red,
+                                  );
+                                  return;
+                                }
+
+                                controller.updateProfile(
+                                  username: username,
+                                  avatarUrl: avatarUrl.isEmpty
+                                      ? null
+                                      : avatarUrl,
+                                );
+                              },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: controller.isUpdating.value
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Save Changes'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 }

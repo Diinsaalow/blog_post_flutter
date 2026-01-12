@@ -110,14 +110,14 @@ class AllPostsController extends GetxController {
         );
       } else {
         await _userRepository.addBookmark(postId);
-        Get.snackbar(
-          'Success',
-          'Added to bookmarks',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withOpacity(0.1),
-          colorText: Colors.green,
-          duration: const Duration(seconds: 2),
-        );
+        // Get.snackbar(
+        //   'Success',
+        //   'Added to bookmarks',
+        //   snackPosition: SnackPosition.TOP,
+        //   backgroundColor: Colors.green.withOpacity(0.8),
+        //   colorText: Colors.white,
+        //   duration: const Duration(seconds: 2),
+        // );
       }
 
       // Trigger UI update

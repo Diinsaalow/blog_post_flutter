@@ -108,13 +108,13 @@ class PostDetailController extends GetxController {
       } else {
         await _userRepository.addBookmark(post.value!.id);
         isFavorite.value = true;
-        Get.snackbar(
-          'Added',
-          'Added to bookmarks',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
-          colorText: Get.theme.primaryColor,
-        );
+        // Get.snackbar(
+        //   'Added',
+        //   'Added to bookmarks',
+        //   snackPosition: SnackPosition.BOTTOM,
+        //   backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
+        //   colorText: Get.theme.primaryColor,
+        // );
       }
     } catch (e) {
       Get.snackbar(

@@ -84,23 +84,23 @@ class FavoritesController extends GetxController {
       if (StorageService.isFavorite(post.id)) {
         await _userRepository.removeBookmark(post.id);
         favoritePosts.removeWhere((p) => p.id == post.id);
-        Get.snackbar(
-          'Removed',
-          'Removed from bookmarks',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange.withOpacity(0.1),
-          colorText: Colors.orange,
-        );
+        // Get.snackbar(
+        //   'Removed',
+        //   'Removed from bookmarks',
+        //   snackPosition: SnackPosition.BOTTOM,
+        //   backgroundColor: Colors.orange.withOpacity(0.1),
+        //   colorText: Colors.orange,
+        // );
       } else {
         await _userRepository.addBookmark(post.id);
         favoritePosts.add(post);
-        Get.snackbar(
-          'Added',
-          'Added to bookmarks',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
-          colorText: Get.theme.primaryColor,
-        );
+        // Get.snackbar(
+        //   'Added',
+        //   'Added to bookmarks',
+        //   snackPosition: SnackPosition.BOTTOM,
+        //   backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
+        //   colorText: Get.theme.primaryColor,
+        // );
       }
     } catch (e) {
       Get.snackbar(
