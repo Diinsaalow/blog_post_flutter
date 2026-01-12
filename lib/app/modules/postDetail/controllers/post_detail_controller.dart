@@ -24,7 +24,9 @@ class PostDetailController extends GetxController {
     if (postArg != null) {
       post.value = postArg;
       isFavorite.value = StorageService.isFavorite(postArg.id);
-      loadComments();
+
+      // Fetch full post details by slug to get content
+      loadPostBySlug(postArg.slug);
     } else {
       final slug = Get.parameters['slug'];
       if (slug != null) {

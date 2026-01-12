@@ -1,5 +1,6 @@
 // lib/app/data/models/post_model.dart
 import 'user_model.dart';
+import 'comment_model.dart';
 
 class PostModel {
   final String id;
@@ -9,12 +10,15 @@ class PostModel {
   final String? coverImageUrl;
   final String? category;
   final bool isFeatured;
+  final bool isPublished;
   final int views;
+  final int readingTimeMin;
+  final String slug;
   final DateTime createdAt;
   final DateTime updatedAt;
   final UserModel? author;
-  final List<dynamic>? comments;
-  
+  final List<CommentModel>? comments;
+
   PostModel({
     required this.id,
     required this.title,
@@ -23,16 +27,24 @@ class PostModel {
     this.coverImageUrl,
     this.category,
     this.isFeatured = false,
+    this.isPublished = true,
     this.views = 0,
+    this.readingTimeMin = 1,
+    required this.slug,
     required this.createdAt,
     required this.updatedAt,
     this.author,
     this.comments,
   });
-  
-  String get slug => title.toLowerCase().replaceAll(' ', '-');
-  
+
   factory PostModel.fromJson(Map<String, dynamic> json) {
+    List<CommentModel>? commentsList;
+    if (json['comments'] != null && json['comments'] is List) {
+      commentsList = (json['comments'] as List)
+          .map((comment) => CommentModel.fromJson(comment))
+          .toList();
+    }
+
     return PostModel(
       id: json['_id'] ?? json['id'] ?? '',
       title: json['title'] ?? '',
@@ -41,16 +53,19 @@ class PostModel {
       coverImageUrl: json['coverImageUrl'],
       category: json['category'],
       isFeatured: json['isFeatured'] ?? false,
+      isPublished: json['isPublished'] ?? true,
       views: json['views'] ?? 0,
+      readingTimeMin: json['readingTimeMin'] ?? 1,
+      slug: json['slug'] ?? '',
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
       author: json['authorId'] != null
           ? UserModel.fromJson(json['authorId'])
           : null,
-      comments: json['comments'],
+      comments: commentsList,
     );
   }
-  
+
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
@@ -60,7 +75,10 @@ class PostModel {
       'coverImageUrl': coverImageUrl,
       'category': category,
       'isFeatured': isFeatured,
+      'isPublished': isPublished,
       'views': views,
+      'readingTimeMin': readingTimeMin,
+      'slug': slug,
     };
   }
 }
