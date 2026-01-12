@@ -166,4 +166,94 @@ class PostDetailController extends GetxController {
   Future<void> refreshComments() async {
     await loadComments();
   }
+
+  Future<void> updateComment(String commentId, String newContent) async {
+    if (newContent.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Comment cannot be empty',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+      return;
+    }
+
+    try {
+      final updatedComment = await _commentRepository.updateComment(
+        commentId: commentId,
+        content: newContent.trim(),
+      );
+
+      // Update comment in list
+      final index = comments.indexWhere((c) => c.id == commentId);
+      if (index != -1) {
+        comments[index] = updatedComment;
+      }
+
+      Get.back(); // Close dialog
+      Get.snackbar(
+        'Success',
+        'Comment updated',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
+        colorText: Get.theme.primaryColor,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString().replaceAll('Exception: ', ''),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    }
+  }
+
+  Future<void> deleteComment(String commentId) async {
+    try {
+      await _commentRepository.deleteComment(commentId);
+
+      // Remove comment from list
+      comments.removeWhere((c) => c.id == commentId);
+
+      Get.back(); // Close dialog
+      Get.snackbar(
+        'Success',
+        'Comment deleted',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
+        colorText: Get.theme.primaryColor,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString().replaceAll('Exception: ', ''),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    }
+  }
+
+  /// Check if current user can edit/delete the comment
+  bool canModifyComment(CommentModel comment) {
+    final userData = StorageService.getUser();
+    if (userData == null) return false;
+
+    final userId = userData['_id'] ?? userData['id'];
+    final commentAuthorId = comment.author?.id;
+
+    // User is the author
+    if (userId == commentAuthorId) return true;
+
+    // User is admin
+    final roleData = userData['roleId'];
+    if (roleData is Map) {
+      final roleName = roleData['name']?.toString().toLowerCase();
+      return roleName == 'admin';
+    }
+
+    return false;
+  }
 }
