@@ -46,7 +46,7 @@ class HomeView extends GetView<HomeController> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Row(
                       children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 24),
+                        // const Icon(Icons.star, color: Colors.amber, size: 24),
                         const SizedBox(width: 8),
                         Text(
                           'Featured Posts',
@@ -91,7 +91,7 @@ class HomeView extends GetView<HomeController> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      const Icon(Icons.access_time, size: 24),
+                      // const Icon(Icons.access_time, size: 24),
                       const SizedBox(width: 8),
                       Text(
                         'Recent Posts',
