@@ -1,0 +1,154 @@
+// lib/app/modules/postDetail/controllers/post_detail_controller.dart
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../../data/repositories/post_repository.dart';
+import '../../../data/repositories/comment_repository.dart';
+import '../../../data/models/post_model.dart';
+import '../../../data/models/comment_model.dart';
+import '../../../core/services/storage_service.dart';
+
+class PostDetailController extends GetxController {
+  final PostRepository _postRepository = Get.find<PostRepository>();
+  final CommentRepository _commentRepository = Get.find<CommentRepository>();
+
+  final Rx<PostModel?> post = Rx<PostModel?>(null);
+  final RxList<CommentModel> comments = <CommentModel>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxBool isCommentsLoading = false.obs;
+  final RxBool isFavorite = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    final postArg = Get.arguments as PostModel?;
+    if (postArg != null) {
+      post.value = postArg;
+      isFavorite.value = StorageService.isFavorite(postArg.id);
+      loadComments();
+    } else {
+      final slug = Get.parameters['slug'];
+      if (slug != null) {
+        loadPostBySlug(slug);
+      }
+    }
+  }
+
+  Future<void> loadPostBySlug(String slug) async {
+    try {
+      isLoading.value = true;
+      final postData = await _postRepository.getPostBySlug(slug);
+      post.value = postData;
+      isFavorite.value = StorageService.isFavorite(postData.id);
+      loadComments();
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+      Get.back();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> loadComments() async {
+    if (post.value == null) return;
+
+    try {
+      isCommentsLoading.value = true;
+      final commentsData = await _commentRepository.getCommentsByPost(
+        post.value!.id,
+      );
+      comments.value = commentsData;
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to load comments: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    } finally {
+      isCommentsLoading.value = false;
+    }
+  }
+
+  Future<void> toggleFavorite() async {
+    if (post.value == null) return;
+
+    try {
+      if (isFavorite.value) {
+        await StorageService.removeFavorite(post.value!.id);
+        isFavorite.value = false;
+        Get.snackbar(
+          'Removed',
+          'Removed from favorites',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange.withOpacity(0.1),
+          colorText: Colors.orange,
+        );
+      } else {
+        await StorageService.addFavorite(post.value!.id);
+        isFavorite.value = true;
+        Get.snackbar(
+          'Added',
+          'Added to favorites',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
+          colorText: Get.theme.primaryColor,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    }
+  }
+
+  Future<void> addComment(String content) async {
+    if (post.value == null || content.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Comment cannot be empty',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+      return;
+    }
+
+    try {
+      final comment = await _commentRepository.createComment(
+        postId: post.value!.id,
+        content: content.trim(),
+      );
+      comments.insert(0, comment);
+      Get.snackbar(
+        'Success',
+        'Comment added',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
+        colorText: Get.theme.primaryColor,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    }
+  }
+
+  Future<void> refreshComments() async {
+    await loadComments();
+  }
+}
