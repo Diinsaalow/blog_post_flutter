@@ -1,4 +1,5 @@
 // lib/app/data/repositories/user_repository.dart
+import 'dart:io';
 import 'package:get/get.dart';
 import '../../core/services/api_service.dart';
 import '../../core/constants/api_constants.dart';
@@ -26,14 +27,35 @@ class UserRepository extends GetxService {
     }
   }
 
-  /// Update user profile
-  Future<UserModel> updateProfile({String? username, String? avatarUrl}) async {
+  /// Update user profile with optional file upload
+  Future<UserModel> updateProfile({
+    String? username,
+    String? avatarUrl,
+    File? profilePicture,
+  }) async {
     try {
-      final body = <String, dynamic>{};
-      if (username != null) body['username'] = username;
-      if (avatarUrl != null) body['avatarUrl'] = avatarUrl;
+      Map<String, dynamic> response;
 
-      final response = await _apiService.put(ApiConstants.userProfile, body);
+      // If there's a file to upload, use multipart request
+      if (profilePicture != null) {
+        final fields = <String, String>{};
+        if (username != null) fields['username'] = username;
+
+        response = await _apiService.uploadWithFile(
+          endpoint: ApiConstants.userProfile,
+          method: 'PUT',
+          file: profilePicture,
+          fileFieldName: 'profilePicture',
+          fields: fields,
+        );
+      } else {
+        // Otherwise, use regular PUT request
+        final body = <String, dynamic>{};
+        if (username != null) body['username'] = username;
+        if (avatarUrl != null) body['avatarUrl'] = avatarUrl;
+
+        response = await _apiService.put(ApiConstants.userProfile, body);
+      }
 
       if (response['success'] == true && response['data'] != null) {
         final user = UserModel.fromJson(response['data']);

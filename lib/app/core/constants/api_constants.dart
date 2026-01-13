@@ -1,8 +1,8 @@
 // lib/app/core/constants/api_constants.dart
 class ApiConstants {
   // Update with your actual API URL
-  static const String baseUrl =
-      'https://blog-post-api-ac7ca4fe3ed0.herokuapp.com/api';
+  // static const String baseUrl ='https://blog-post-api-ac7ca4fe3ed0.herokuapp.com/api';
+  static const String baseUrl ='http://10.1.1.5:5000/api';
   // For Android emulator: 'http://10.0.2.5:3000/api'
   // For iOS simulator: 'http://localhost:3000/api'
   // For physical device: 'http://YOUR_IP:3000/api'

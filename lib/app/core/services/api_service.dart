@@ -1,6 +1,8 @@
 // lib/app/core/services/api_service.dart
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:get/get.dart';
 import '../constants/api_constants.dart';
 import 'storage_service.dart';
@@ -76,6 +78,71 @@ class ApiService extends GetxService {
       return _handleResponse(response);
     } catch (e) {
       throw _handleError(e);
+    }
+  }
+
+  /// Upload file with multipart/form-data
+  Future<Map<String, dynamic>> uploadWithFile({
+    required String endpoint,
+    required String method, // 'POST' or 'PUT'
+    File? file,
+    String? fileFieldName,
+    Map<String, String>? fields,
+  }) async {
+    try {
+      final uri = Uri.parse('$baseUrl$endpoint');
+      final request = http.MultipartRequest(method, uri);
+
+      // Add authorization header
+      if (StorageService.getToken() != null) {
+        request.headers['Authorization'] =
+            'Bearer ${StorageService.getToken()}';
+      }
+
+      // Add text fields
+      if (fields != null) {
+        request.fields.addAll(fields);
+      }
+
+      // Add file if provided
+      if (file != null && fileFieldName != null) {
+        final fileExtension = file.path.split('.').last.toLowerCase();
+        final mimeType = _getMimeType(fileExtension);
+
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            fileFieldName,
+            file.path,
+            contentType: MediaType.parse(mimeType),
+          ),
+        );
+      }
+
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 60), // Longer timeout for file uploads
+      );
+
+      final response = await http.Response.fromStream(streamedResponse);
+      return _handleResponse(response);
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  /// Get MIME type based on file extension
+  String _getMimeType(String extension) {
+    switch (extension) {
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'gif':
+        return 'image/gif';
+      case 'webp':
+        return 'image/webp';
+      default:
+        return 'application/octet-stream';
     }
   }
 

@@ -290,39 +290,6 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  Widget _buildStatCard(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 32),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-        ],
-      ),
-    );
-  }
-
   Widget _buildInfoTile(
     BuildContext context, {
     required IconData icon,
@@ -426,6 +393,74 @@ class ProfileView extends GetView<ProfileController> {
                 ],
               ),
               const SizedBox(height: 24),
+
+              // Profile Picture Preview
+              Obx(
+                () => Center(
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Theme.of(context).primaryColor,
+                            width: 3,
+                          ),
+                        ),
+                        child: CircleAvatar(
+                          radius: 60,
+                          backgroundImage: controller.selectedImage.value != null
+                              ? FileImage(controller.selectedImage.value!)
+                              : (controller.user.value?.avatarUrl != null
+                                  ? CachedNetworkImageProvider(
+                                      controller.user.value!.avatarUrl!,
+                                    )
+                                  : null),
+                          backgroundColor: Colors.grey[200],
+                          child: controller.selectedImage.value == null &&
+                                  controller.user.value?.avatarUrl == null
+                              ? Icon(
+                                  Icons.person,
+                                  size: 60,
+                                  color: Colors.grey[400],
+                                )
+                              : null,
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: controller.showImageSourceDialog,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: TextButton.icon(
+                  onPressed: controller.showImageSourceDialog,
+                  icon: const Icon(Icons.edit),
+                  label: const Text('Change Profile Picture'),
+                ),
+              ),
+              const SizedBox(height: 24),
+
               TextField(
                 controller: controller.usernameController,
                 decoration: InputDecoration(
@@ -436,20 +471,6 @@ class ProfileView extends GetView<ProfileController> {
                   ),
                   filled: true,
                   fillColor: Colors.grey[50],
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: controller.avatarUrlController,
-                decoration: InputDecoration(
-                  labelText: 'Avatar URL',
-                  prefixIcon: const Icon(Icons.image_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                  hintText: 'https://example.com/avatar.jpg',
                 ),
               ),
               const SizedBox(height: 24),
@@ -480,10 +501,6 @@ class ProfileView extends GetView<ProfileController> {
                                     .usernameController
                                     .text
                                     .trim();
-                                final avatarUrl = controller
-                                    .avatarUrlController
-                                    .text
-                                    .trim();
 
                                 if (username.isEmpty) {
                                   Get.snackbar(
@@ -500,9 +517,6 @@ class ProfileView extends GetView<ProfileController> {
 
                                 controller.updateProfile(
                                   username: username,
-                                  avatarUrl: avatarUrl.isEmpty
-                                      ? null
-                                      : avatarUrl,
                                 );
                               },
                         style: ElevatedButton.styleFrom(
