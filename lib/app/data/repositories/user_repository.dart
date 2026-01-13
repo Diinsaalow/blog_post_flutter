@@ -96,7 +96,16 @@ class UserRepository extends GetxService {
       final response = await _apiService.get(ApiConstants.userBookmarks);
 
       if (response['success'] == true && response['data'] != null) {
-        return List<Map<String, dynamic>>.from(response['data']);
+        // Ensure proper type conversion for nested maps
+        final data = response['data'] as List;
+        return data.map((item) {
+          if (item is Map<String, dynamic>) {
+            return item;
+          } else {
+            // Convert Map<dynamic, dynamic> to Map<String, dynamic>
+            return Map<String, dynamic>.from(item as Map);
+          }
+        }).toList();
       }
 
       throw Exception(response['message'] ?? 'Failed to get bookmarks');

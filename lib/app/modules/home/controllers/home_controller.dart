@@ -19,6 +19,20 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     loadPosts();
+    // Sync bookmarks from backend on app start if logged in
+    if (StorageService.isLoggedIn) {
+      _syncBookmarksFromBackend();
+    }
+  }
+
+  /// Sync bookmarks from backend to local storage
+  Future<void> _syncBookmarksFromBackend() async {
+    try {
+      await _userRepository.getProfile();
+    } catch (e) {
+      // Silently fail sync, don't interrupt user experience
+      print('Failed to sync bookmarks on app start: $e');
+    }
   }
 
   Future<void> loadPosts() async {

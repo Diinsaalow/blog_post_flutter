@@ -34,14 +34,32 @@ class FavoritesController extends GetxController {
 
       if (bookmarksData.isEmpty) {
         favoritePosts.clear();
+        // Clear local storage if backend has no bookmarks
+        await StorageService.syncFavoritesFromBackend([]);
         return;
       }
 
-      // Convert bookmarks data to PostModel list
-      favoritePosts.value = bookmarksData
-          .map((bookmarkData) => PostModel.fromJson(bookmarkData))
-          .toList();
-    } catch (e) {
+      // Convert bookmarks data to PostModel list with better error handling
+      final List<PostModel> posts = [];
+      for (var bookmarkData in bookmarksData) {
+        try {
+          final post = PostModel.fromJson(bookmarkData);
+          posts.add(post);
+        } catch (parseError) {
+          print('Failed to parse bookmark: $parseError');
+          print('Data: $bookmarkData');
+          // Continue with other bookmarks instead of failing completely
+        }
+      }
+
+      favoritePosts.value = posts;
+
+      // Sync local storage with backend data
+      final bookmarkIds = posts.map((post) => post.id).toList();
+      await StorageService.syncFavoritesFromBackend(bookmarkIds);
+    } catch (e, stackTrace) {
+      print('Error loading bookmarks: $e');
+      print('Stack trace: $stackTrace');
       Get.snackbar(
         'Error',
         'Failed to load bookmarks: ${e.toString()}',
@@ -81,7 +99,10 @@ class FavoritesController extends GetxController {
     }
 
     try {
-      if (StorageService.isFavorite(post.id)) {
+      // Check against the actual loaded favorites list, not just local storage
+      final isCurrentlyFavorite = favoritePosts.any((p) => p.id == post.id);
+
+      if (isCurrentlyFavorite) {
         await _userRepository.removeBookmark(post.id);
         favoritePosts.removeWhere((p) => p.id == post.id);
         // Get.snackbar(
@@ -93,7 +114,10 @@ class FavoritesController extends GetxController {
         // );
       } else {
         await _userRepository.addBookmark(post.id);
-        favoritePosts.add(post);
+        // Only add if not already in the list
+        if (!favoritePosts.any((p) => p.id == post.id)) {
+          favoritePosts.add(post);
+        }
         // Get.snackbar(
         //   'Added',
         //   'Added to bookmarks',
@@ -110,6 +134,8 @@ class FavoritesController extends GetxController {
         backgroundColor: Colors.red.withOpacity(0.1),
         colorText: Colors.red,
       );
+      // Reload favorites to ensure sync with backend on error
+      await loadFavorites();
     }
   }
 
@@ -122,6 +148,10 @@ class FavoritesController extends GetxController {
   }
 
   bool isFavorite(String postId) {
+    // Check against loaded favorites first, fall back to storage
+    if (favoritePosts.isNotEmpty) {
+      return favoritePosts.any((post) => post.id == postId);
+    }
     return StorageService.isFavorite(postId);
   }
 }

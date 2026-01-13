@@ -40,21 +40,31 @@ class UserModel {
   }
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // Helper to safely parse bookmarks list
+    List<String> parseBookmarks(dynamic bookmarksData) {
+      if (bookmarksData == null) return [];
+      if (bookmarksData is List) {
+        return bookmarksData
+            .map((item) => item?.toString() ?? '')
+            .where((item) => item.isNotEmpty)
+            .toList();
+      }
+      return [];
+    }
+
     return UserModel(
-      id: json['_id'] ?? json['id'] ?? '',
-      email: json['email'] ?? '',
-      username: json['username'] ?? '',
-      avatarUrl: json['avatarUrl'],
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      email: (json['email'] ?? '').toString(),
+      username: (json['username'] ?? '').toString(),
+      avatarUrl: json['avatarUrl']?.toString(),
       roleId: json['roleId'], // Keep as dynamic
-      status: json['status'],
-      bookmarks: json['bookmarks'] != null
-          ? List<String>.from(json['bookmarks'])
-          : [],
+      status: json['status']?.toString(),
+      bookmarks: parseBookmarks(json['bookmarks']),
       createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
+          ? DateTime.tryParse(json['createdAt'].toString())
           : null,
       updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'])
+          ? DateTime.tryParse(json['updatedAt'].toString())
           : null,
     );
   }

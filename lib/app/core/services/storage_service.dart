@@ -78,6 +78,19 @@ class StorageService {
     return getFavorites().contains(postId);
   }
 
+  /// Sync local favorites with backend bookmarks
+  /// This ensures local storage matches the source of truth (backend)
+  static Future<void> syncFavoritesFromBackend(List<String> bookmarkIds) async {
+    await _storage.write(_favoritesKey, bookmarkIds);
+
+    // Update user data in storage to reflect the synced bookmarks
+    final user = getUser();
+    if (user != null) {
+      user['bookmarks'] = bookmarkIds;
+      await _storage.write(_userKey, user);
+    }
+  }
+
   // Auth status
   static bool get isLoggedIn => getToken() != null;
 

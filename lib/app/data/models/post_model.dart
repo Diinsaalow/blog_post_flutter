@@ -45,22 +45,32 @@ class PostModel {
           .toList();
     }
 
+    // Helper to safely convert to String
+    String safeString(dynamic value, String defaultValue) {
+      if (value == null) return defaultValue;
+      return value.toString();
+    }
+
     return PostModel(
-      id: json['_id'] ?? json['id'] ?? '',
-      title: json['title'] ?? '',
-      excerpt: json['excerpt'],
-      content: json['content'],
-      coverImageUrl: json['coverImageUrl'],
-      category: json['category'],
-      isFeatured: json['isFeatured'] ?? false,
-      isPublished: json['isPublished'] ?? true,
-      views: json['views'] ?? 0,
-      readingTimeMin: json['readingTimeMin'] ?? 1,
-      slug: json['slug'] ?? '',
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
-      author: json['authorId'] != null
-          ? UserModel.fromJson(json['authorId'])
+      id: safeString(json['_id'] ?? json['id'], ''),
+      title: safeString(json['title'], ''),
+      excerpt: json['excerpt']?.toString(),
+      content: json['content']?.toString(),
+      coverImageUrl: json['coverImageUrl']?.toString(),
+      category: json['category']?.toString(),
+      isFeatured: json['isFeatured'] == true || json['isFeatured'] == 'true',
+      isPublished: json['isPublished'] == true || json['isPublished'] == 'true',
+      views: int.tryParse(json['views']?.toString() ?? '0') ?? 0,
+      readingTimeMin: int.tryParse(json['readingTimeMin']?.toString() ?? '1') ?? 1,
+      slug: safeString(json['slug'], ''),
+      createdAt: json['createdAt'] != null 
+          ? DateTime.parse(json['createdAt'].toString()) 
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null 
+          ? DateTime.parse(json['updatedAt'].toString()) 
+          : DateTime.now(),
+      author: json['authorId'] != null && json['authorId'] is Map
+          ? UserModel.fromJson(Map<String, dynamic>.from(json['authorId']))
           : null,
       comments: commentsList,
     );
