@@ -186,37 +186,37 @@ class AllPostsView extends GetView<AllPostsController> {
           ),
         ],
       ),
-      bottomNavigationBar: Obx(
-        () => BottomNavigationBar(
-          currentIndex: navigationController.currentIndex.value,
-          onTap: navigationController.changePage,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Theme.of(context).primaryColor,
-          unselectedItemColor: Colors.grey,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.article_outlined),
-              activeIcon: Icon(Icons.article),
-              label: 'All Posts',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite_outline),
-              activeIcon: Icon(Icons.favorite),
-              label: 'Favorites',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
-            ),
-          ],
-        ),
-      ),
+      // bottomNavigationBar: Obx(
+      //   () => BottomNavigationBar(
+      //     currentIndex: navigationController.currentIndex.value,
+      //     onTap: navigationController.changePage,
+      //     type: BottomNavigationBarType.fixed,
+      //     selectedItemColor: Theme.of(context).primaryColor,
+      //     unselectedItemColor: Colors.grey,
+      //     items: const [
+      //       BottomNavigationBarItem(
+      //         icon: Icon(Icons.home_outlined),
+      //         activeIcon: Icon(Icons.home),
+      //         label: 'Home',
+      //       ),
+      //       BottomNavigationBarItem(
+      //         icon: Icon(Icons.article_outlined),
+      //         activeIcon: Icon(Icons.article),
+      //         label: 'All Posts',
+      //       ),
+      //       BottomNavigationBarItem(
+      //         icon: Icon(Icons.favorite_outline),
+      //         activeIcon: Icon(Icons.favorite),
+      //         label: 'Favorites',
+      //       ),
+      //       BottomNavigationBarItem(
+      //         icon: Icon(Icons.person_outline),
+      //         activeIcon: Icon(Icons.person),
+      //         label: 'Profile',
+      //       ),
+      //     ],
+      //   ),
+      // ),
     );
   }
 

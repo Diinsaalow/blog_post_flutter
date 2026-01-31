@@ -1,4 +1,8 @@
 // lib/app/modules/home/controllers/home_controller.dart
+import 'package:blog_post_flutter/app/modules/allPosts/views/all_posts_view.dart';
+import 'package:blog_post_flutter/app/modules/favorites/views/favorites_view.dart';
+import 'package:blog_post_flutter/app/modules/home/views/tabs/home_tab.dart';
+import 'package:blog_post_flutter/app/modules/profile/views/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/repositories/post_repository.dart';
@@ -14,6 +18,20 @@ class HomeController extends GetxController {
   final RxList<PostModel> featuredPosts = <PostModel>[].obs;
   final RxList<PostModel> recentPosts = <PostModel>[].obs;
   final RxBool isLoading = false.obs;
+
+  int currentTab = 0;
+
+  updateCurrentTab(int tab) {
+    currentTab = tab;
+    update();
+  }
+
+  List<Widget> tabs = [
+    HomeTab(),
+    AllPostsView(),
+    FavoritesView(),
+    ProfileView(),
+  ];
 
   @override
   void onInit() {
