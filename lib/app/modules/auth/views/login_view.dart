@@ -17,6 +17,7 @@ class LoginView extends GetView<AuthController> {
     final RxBool obscurePassword = true.obs;
 
     return Scaffold(
+      appBar: AppBar(title: const Text('Login'), centerTitle: true),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -25,7 +26,7 @@ class LoginView extends GetView<AuthController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 40),
+                const SizedBox(height: 24),
                 // Logo or App Name
                 Icon(
                   Icons.article,

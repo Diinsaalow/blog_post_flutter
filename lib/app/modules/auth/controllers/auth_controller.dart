@@ -5,6 +5,10 @@ import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../routes/app_pages.dart';
+import '../../home/controllers/home_controller.dart';
+import '../../favorites/controllers/favorites_controller.dart';
+import '../../allPosts/controllers/all_posts_controller.dart';
+import '../../profile/controllers/profile_controller.dart';
 
 class AuthController extends GetxController {
   final AuthRepository _authRepository = Get.find<AuthRepository>();
@@ -45,6 +49,10 @@ class AuthController extends GetxController {
       }
 
       isLoggedIn.value = true;
+
+      // Refresh app state on register
+      _refreshAppStateOnLogin();
+
       Get.offAllNamed(Routes.HOME);
       Get.snackbar(
         'Success',
@@ -80,6 +88,10 @@ class AuthController extends GetxController {
       }
 
       isLoggedIn.value = true;
+
+      // Refresh app state on login to ensure fresh data
+      _refreshAppStateOnLogin();
+
       Get.offAllNamed(Routes.HOME);
       Get.snackbar(
         'Success',
@@ -105,7 +117,12 @@ class AuthController extends GetxController {
     try {
       await _authRepository.logout();
       isLoggedIn.value = false;
-      Get.offAllNamed(Routes.LOGIN);
+
+      // Clear all app state
+      _resetAppState();
+
+      // Use offNamedUntil to avoid trying to delete permanent controllers
+      Get.offNamedUntil(Routes.HOME, (route) => false);
       Get.snackbar(
         'Success',
         'Logged out successfully!',
@@ -121,6 +138,55 @@ class AuthController extends GetxController {
         backgroundColor: Colors.red.withOpacity(0.1),
         colorText: Colors.red,
       );
+    }
+  }
+
+  void _resetAppState() {
+    // 1. Clear Favorites
+    if (Get.isRegistered<FavoritesController>()) {
+      Get.find<FavoritesController>().favoritePosts.clear();
+    }
+
+    // 2. Reset All Posts Filters
+    if (Get.isRegistered<AllPostsController>()) {
+      final allPostsController = Get.find<AllPostsController>();
+      allPostsController.clearFilters();
+      allPostsController.loadPosts();
+    }
+
+    // 3. Reset Home Tab to 0 (Home)
+    if (Get.isRegistered<HomeController>()) {
+      final homeController = Get.find<HomeController>();
+      homeController.currentTab = 0;
+      homeController.update();
+      homeController.loadPosts();
+    }
+
+    // 4. Reset Profile
+    if (Get.isRegistered<ProfileController>()) {
+      Get.find<ProfileController>().user.value = null;
+    }
+  }
+
+  void _refreshAppStateOnLogin() {
+    // Reload favorites
+    if (Get.isRegistered<FavoritesController>()) {
+      Get.find<FavoritesController>().loadFavorites();
+    }
+
+    // Reload Profile
+    if (Get.isRegistered<ProfileController>()) {
+      Get.find<ProfileController>().loadUser();
+    }
+
+    // Reload Home posts (to update bookmark status)
+    if (Get.isRegistered<HomeController>()) {
+      Get.find<HomeController>().loadPosts();
+    }
+
+    // Reload All Posts (to update bookmark status)
+    if (Get.isRegistered<AllPostsController>()) {
+      Get.find<AllPostsController>().loadPosts();
     }
   }
 }

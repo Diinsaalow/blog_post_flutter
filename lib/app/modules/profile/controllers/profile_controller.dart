@@ -8,6 +8,9 @@ import '../../../data/models/user_model.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/user_repository.dart';
 import '../../../routes/app_pages.dart';
+import '../../home/controllers/home_controller.dart';
+import '../../favorites/controllers/favorites_controller.dart';
+import '../../allPosts/controllers/all_posts_controller.dart';
 
 class ProfileController extends GetxController {
   final AuthRepository _authRepository = Get.find<AuthRepository>();
@@ -38,11 +41,20 @@ class ProfileController extends GetxController {
     }
   }
 
+  bool isLoggedIn() {
+    return StorageService.isLoggedIn;
+  }
+
   Future<void> logout() async {
     try {
       isLoading.value = true;
       await _authRepository.logout();
-      Get.offAllNamed(Routes.LOGIN);
+
+      // Clear all app state
+      _resetAppState();
+
+      // Use offNamedUntil to avoid trying to delete permanent controllers
+      Get.offNamedUntil(Routes.HOME, (route) => false);
       Get.snackbar(
         'Success',
         'Logged out successfully!',
@@ -60,6 +72,33 @@ class ProfileController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void _resetAppState() {
+    // 1. Reset Profile
+    user.value = null;
+
+    // 2. Clear Favorites
+    if (Get.isRegistered<FavoritesController>()) {
+      Get.find<FavoritesController>().favoritePosts.clear();
+    }
+
+    // 3. Reset All Posts Filters
+    if (Get.isRegistered<AllPostsController>()) {
+      final allPostsController = Get.find<AllPostsController>();
+      allPostsController.clearFilters();
+      // Reload to ensure fresh state (e.g. remove any user specific data if any)
+      allPostsController.loadPosts();
+    }
+
+    // 4. Reset Home Tab to 0 (Home)
+    if (Get.isRegistered<HomeController>()) {
+      final homeController = Get.find<HomeController>();
+      homeController.currentTab = 0;
+      homeController.update();
+      // Also reload home posts
+      homeController.loadPosts();
     }
   }
 

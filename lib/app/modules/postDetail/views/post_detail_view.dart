@@ -270,6 +270,15 @@ class PostDetailView extends GetView<PostDetailController> {
                           Expanded(
                             child: TextField(
                               controller: commentController,
+                              onTap: () {
+                                // Check if user is logged in before allowing comment
+                                if (!controller.isUserLoggedIn()) {
+                                  // Unfocus the text field
+                                  FocusScope.of(context).unfocus();
+                                  // Show login prompt
+                                  controller.promptLogin();
+                                }
+                              },
                               decoration: const InputDecoration(
                                 hintText: 'Write a comment...',
                                 border: InputBorder.none,

@@ -256,4 +256,38 @@ class PostDetailController extends GetxController {
 
     return false;
   }
+
+  /// Check if user is logged in
+  bool isUserLoggedIn() {
+    return StorageService.isLoggedIn;
+  }
+
+  /// Prompt user to login before commenting
+  void promptLogin() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.login, color: Colors.blue, size: 28),
+            SizedBox(width: 12),
+            Text('Login Required'),
+          ],
+        ),
+        content: const Text(
+          'You need to be logged in to comment on posts. Please login or create an account to continue.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              Get.back(); // Close dialog
+              Get.toNamed('/login'); // Navigate to login
+            },
+            child: const Text('Login'),
+          ),
+        ],
+      ),
+    );
+  }
 }

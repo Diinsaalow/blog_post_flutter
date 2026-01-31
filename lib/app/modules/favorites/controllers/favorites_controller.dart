@@ -154,4 +154,8 @@ class FavoritesController extends GetxController {
     }
     return StorageService.isFavorite(postId);
   }
+
+  bool isLoggedIn() {
+    return StorageService.isLoggedIn;
+  }
 }

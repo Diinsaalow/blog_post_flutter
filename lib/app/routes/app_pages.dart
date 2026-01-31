@@ -13,7 +13,6 @@ import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/postDetail/bindings/post_detail_binding.dart';
 import '../modules/postDetail/views/post_detail_view.dart';
-import '../core/services/storage_service.dart';
 
 part 'app_routes.dart';
 
@@ -21,7 +20,8 @@ class AppPages {
   AppPages._();
 
   static String get INITIAL {
-    return StorageService.isLoggedIn ? Routes.HOME : Routes.LOGIN;
+    return Routes
+        .HOME; // Always start at home, login required only for actions like commenting
   }
 
   static final routes = [
