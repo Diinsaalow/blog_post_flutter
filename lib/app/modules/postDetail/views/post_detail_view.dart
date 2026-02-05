@@ -38,9 +38,6 @@ class PostDetailView extends GetView<PostDetailController> {
             ),
           );
         }
-        print("The post is $post");
-        var comment = post.comments?[0];
-        print("The comment is ${comment?.id}");
 
         return CustomScrollView(
           slivers: [
@@ -102,13 +99,46 @@ class PostDetailView extends GetView<PostDetailController> {
                     onPressed: controller.toggleFavorite,
                   ),
                 ),
-                // IconButton(
-                //   icon: const Icon(Icons.share),
-                //   onPressed: () {
-                //     // TODO: Implement share functionality
-                //     Get.snackbar('Share', 'Share functionality coming soon');
-                //   },
-                // ),
+                Obx(() {
+                  if (controller.canModifyPost) {
+                    return PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: Colors.white),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          controller.navigateToEditPost();
+                        } else if (value == 'delete') {
+                          _showDeletePostDialog(context, controller);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Row(
+                            children: [
+                              Icon(Icons.edit, size: 20),
+                              SizedBox(width: 8),
+                              Text('Edit Post'),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete, size: 20, color: Colors.red),
+                              SizedBox(width: 8),
+                              Text(
+                                'Delete Post',
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
               ],
             ),
 
@@ -608,6 +638,35 @@ class PostDetailView extends GetView<PostDetailController> {
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () => controller.deleteComment(commentId),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeletePostDialog(
+    BuildContext context,
+    PostDetailController controller,
+  ) {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+            SizedBox(width: 12),
+            Text('Delete Post'),
+          ],
+        ),
+        content: const Text(
+          'Are you sure you want to delete this post? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => controller.deletePost(),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Delete'),
           ),

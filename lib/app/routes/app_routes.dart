@@ -9,6 +9,7 @@ abstract class Routes {
   static const FAVORITES = _Paths.FAVORITES;
   static const PROFILE = _Paths.PROFILE;
   static const POST_DETAIL = _Paths.POST_DETAIL;
+  static const EDIT_POST = _Paths.EDIT_POST;
 }
 
 abstract class _Paths {
@@ -20,4 +21,5 @@ abstract class _Paths {
   static const FAVORITES = '/favorites';
   static const PROFILE = '/profile';
   static const POST_DETAIL = '/post-detail';
+  static const EDIT_POST = '/edit-post';
 }

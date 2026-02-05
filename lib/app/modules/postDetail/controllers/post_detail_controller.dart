@@ -7,6 +7,8 @@ import '../../../data/repositories/user_repository.dart';
 import '../../../data/models/post_model.dart';
 import '../../../data/models/comment_model.dart';
 import '../../../core/services/storage_service.dart';
+import 'package:blog_post_flutter/app/routes/app_pages.dart';
+import 'package:blog_post_flutter/app/modules/home/controllers/home_controller.dart';
 
 class PostDetailController extends GetxController {
   final PostRepository _postRepository = Get.find<PostRepository>();
@@ -289,5 +291,66 @@ class PostDetailController extends GetxController {
         ],
       ),
     );
+  }
+
+  /// Check if current user can edit/delete the post
+  bool get canModifyPost {
+    if (post.value == null) return false;
+    final userData = StorageService.getUser();
+    if (userData == null) return false;
+
+    final userId = userData['_id'] ?? userData['id'];
+    final postAuthorId = post.value!.author?.id;
+
+    // User is the author
+    if (userId == postAuthorId) return true;
+
+    // User is admin
+    final roleData = userData['roleId'];
+    if (roleData is Map) {
+      final roleName = roleData['name']?.toString().toLowerCase();
+      return roleName == 'admin';
+    }
+
+    return false;
+  }
+
+  Future<void> deletePost() async {
+    if (post.value == null) return;
+    try {
+      await _postRepository.deletePost(post.value!.id);
+
+      Get.back(); // Close dialog
+      Get.back(); // Go back to previous screen
+
+      // Refresh home posts
+      if (Get.isRegistered<HomeController>()) {
+        Get.find<HomeController>().refreshPosts();
+      }
+
+      Get.snackbar(
+        'Success',
+        'Post deleted successfully',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.withOpacity(0.1),
+        colorText: Colors.green,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    }
+  }
+
+  Future<void> navigateToEditPost() async {
+    if (post.value == null) return;
+    final result = await Get.toNamed(Routes.EDIT_POST, arguments: post.value);
+    if (result != null && result is PostModel) {
+      post.value = result;
+    }
   }
 }

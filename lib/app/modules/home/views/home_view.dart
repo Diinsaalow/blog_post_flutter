@@ -51,6 +51,11 @@ class HomeView extends GetView<HomeController> {
                     label: 'All Posts',
                   ),
                   BottomNavigationBarItem(
+                    icon: Icon(Icons.add_box_outlined),
+                    activeIcon: Icon(Icons.add_box),
+                    label: 'Create',
+                  ),
+                  BottomNavigationBarItem(
                     icon: Icon(Icons.favorite_outline),
                     activeIcon: Icon(Icons.favorite),
                     label: 'Favorites',

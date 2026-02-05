@@ -13,6 +13,8 @@ import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/postDetail/bindings/post_detail_binding.dart';
 import '../modules/postDetail/views/post_detail_view.dart';
+import '../modules/editPost/bindings/edit_post_binding.dart';
+import '../modules/editPost/views/edit_post_view.dart';
 
 part 'app_routes.dart';
 
@@ -59,6 +61,11 @@ class AppPages {
       name: _Paths.POST_DETAIL,
       page: () => const PostDetailView(),
       binding: PostDetailBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDIT_POST,
+      page: () => const EditPostView(),
+      binding: EditPostBinding(),
     ),
   ];
 }

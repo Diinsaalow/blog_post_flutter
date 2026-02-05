@@ -2,6 +2,7 @@
 import 'package:blog_post_flutter/app/modules/allPosts/views/all_posts_view.dart';
 import 'package:blog_post_flutter/app/modules/favorites/views/favorites_view.dart';
 import 'package:blog_post_flutter/app/modules/home/views/tabs/home_tab.dart';
+import 'package:blog_post_flutter/app/modules/createPost/views/create_post_view.dart';
 import 'package:blog_post_flutter/app/modules/profile/views/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -29,6 +30,7 @@ class HomeController extends GetxController {
   List<Widget> tabs = [
     HomeTab(),
     AllPostsView(),
+    CreatePostView(),
     FavoritesView(),
     ProfileView(),
   ];
