@@ -24,11 +24,12 @@ class ProfileView extends GetView<ProfileController> {
         centerTitle: true,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () => _showEditProfileDialog(context),
-            tooltip: 'Edit Profile',
-          ),
+          if (controller.isLoggedIn())
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () => _showEditProfileDialog(context),
+              tooltip: 'Edit Profile',
+            ),
         ],
       ),
       body: !controller.isLoggedIn()

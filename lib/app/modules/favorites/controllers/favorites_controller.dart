@@ -31,6 +31,7 @@ class FavoritesController extends GetxController {
 
       // Fetch bookmarks from backend
       final bookmarksData = await _userRepository.getBookmarks();
+      print('DEBUG: Bookmarks Data: $bookmarksData'); // Debug log
 
       if (bookmarksData.isEmpty) {
         favoritePosts.clear();
@@ -105,26 +106,26 @@ class FavoritesController extends GetxController {
       if (isCurrentlyFavorite) {
         await _userRepository.removeBookmark(post.id);
         favoritePosts.removeWhere((p) => p.id == post.id);
-        // Get.snackbar(
-        //   'Removed',
-        //   'Removed from bookmarks',
-        //   snackPosition: SnackPosition.BOTTOM,
-        //   backgroundColor: Colors.orange.withOpacity(0.1),
-        //   colorText: Colors.orange,
-        // );
+        Get.snackbar(
+          'Removed',
+          'Removed from bookmarks',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange.withOpacity(0.1),
+          colorText: Colors.orange,
+        );
       } else {
         await _userRepository.addBookmark(post.id);
         // Only add if not already in the list
         if (!favoritePosts.any((p) => p.id == post.id)) {
           favoritePosts.add(post);
         }
-        // Get.snackbar(
-        //   'Added',
-        //   'Added to bookmarks',
-        //   snackPosition: SnackPosition.BOTTOM,
-        //   backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
-        //   colorText: Get.theme.primaryColor,
-        // );
+        Get.snackbar(
+          'Added',
+          'Added to bookmarks',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Get.theme.primaryColor.withOpacity(0.1),
+          colorText: Get.theme.primaryColor,
+        );
       }
     } catch (e) {
       Get.snackbar(

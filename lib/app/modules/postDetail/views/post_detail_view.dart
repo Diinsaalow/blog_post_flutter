@@ -38,6 +38,9 @@ class PostDetailView extends GetView<PostDetailController> {
             ),
           );
         }
+        print("The post is $post");
+        var comment = post.comments?[0];
+        print("The comment is ${comment?.id}");
 
         return CustomScrollView(
           slivers: [
@@ -99,13 +102,13 @@ class PostDetailView extends GetView<PostDetailController> {
                     onPressed: controller.toggleFavorite,
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.share),
-                  onPressed: () {
-                    // TODO: Implement share functionality
-                    Get.snackbar('Share', 'Share functionality coming soon');
-                  },
-                ),
+                // IconButton(
+                //   icon: const Icon(Icons.share),
+                //   onPressed: () {
+                //     // TODO: Implement share functionality
+                //     Get.snackbar('Share', 'Share functionality coming soon');
+                //   },
+                // ),
               ],
             ),
 

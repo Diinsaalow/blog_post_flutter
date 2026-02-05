@@ -35,20 +35,11 @@ class _PostCardState extends State<PostCard> {
   @override
   void didUpdateWidget(PostCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Sync state with storage when widget updates
-    if (oldWidget.post.id != widget.post.id) {
-      isFavorite = StorageService.isFavorite(widget.post.id);
-    }
+    isFavorite = StorageService.isFavorite(widget.post.id);
   }
 
   void _handleFavoriteTap() {
     if (widget.onFavoriteTap != null) {
-      // Optimistically toggle the UI immediately for instant feedback
-      setState(() {
-        isFavorite = !isFavorite;
-      });
-
-      // Call the parent's callback (async backend sync)
       widget.onFavoriteTap!();
     }
   }
