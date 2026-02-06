@@ -27,45 +27,29 @@ class HomeView extends GetView<HomeController> {
               : null,
           body: GetBuilder<HomeController>(
             builder: (homeController) {
+              // Show loading while menus are being fetched
+              if (homeController.menus.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
               return homeController.tabs[homeController.currentTab];
             },
           ),
 
           bottomNavigationBar: GetBuilder<HomeController>(
             builder: (cont) {
+              // Show loading or default state if menus not loaded yet
+              if (cont.menus.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
               return BottomNavigationBar(
                 currentIndex: cont.currentTab,
                 onTap: cont.updateCurrentTab,
                 type: BottomNavigationBarType.fixed,
                 selectedItemColor: Theme.of(context).primaryColor,
                 unselectedItemColor: Colors.grey,
-                items: const [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home_outlined),
-                    activeIcon: Icon(Icons.home),
-                    label: 'Home',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.article_outlined),
-                    activeIcon: Icon(Icons.article),
-                    label: 'All Posts',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.add_box_outlined),
-                    activeIcon: Icon(Icons.add_box),
-                    label: 'Create',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.favorite_outline),
-                    activeIcon: Icon(Icons.favorite),
-                    label: 'Favorites',
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.person_outline),
-                    activeIcon: Icon(Icons.person),
-                    label: 'Profile',
-                  ),
-                ],
+                items: cont.navItems,
               );
             },
           ),

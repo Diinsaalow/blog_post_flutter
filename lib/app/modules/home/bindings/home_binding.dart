@@ -2,6 +2,7 @@ import 'package:blog_post_flutter/app/modules/allPosts/controllers/all_posts_con
 import 'package:blog_post_flutter/app/modules/favorites/controllers/favorites_controller.dart';
 import 'package:blog_post_flutter/app/modules/createPost/controllers/create_post_controller.dart';
 import 'package:blog_post_flutter/app/modules/profile/controllers/profile_controller.dart';
+import 'package:blog_post_flutter/app/data/repositories/menu_repository.dart';
 import 'package:get/get.dart';
 
 import '../controllers/home_controller.dart';
@@ -9,6 +10,7 @@ import '../controllers/home_controller.dart';
 class HomeBinding extends Bindings {
   @override
   void dependencies() {
+    Get.lazyPut<MenuRepository>(() => MenuRepository());
     Get.put<HomeController>(HomeController(), permanent: true);
     Get.put<AllPostsController>(AllPostsController(), permanent: true);
     Get.put<FavoritesController>(FavoritesController(), permanent: true);
